@@ -7,10 +7,6 @@ assignees: ''
 
 ---
 
-### 📌 PR 제목
-> 예: feat: add global ApiResponse and exception handler
-
-
 ### 💡 작업 내용 요약
 - 
 -
