@@ -5,12 +5,12 @@ import org.springframework.http.HttpStatus;
 
 public class UserExceptions {
     public static class UserNotFoundException extends BusinessException {
-        public UserNotFoundException(int userId) {
-            super("USER_NOT_FOUND", String.format("ID가 %d인 회원을 찾을 수 없습니다.", userId), HttpStatus.NOT_FOUND);
+        public UserNotFoundException(long userId) {
+            super("USER_NOT_FOUND", String.format("ID가 " + userId + "인 회원을 찾을 수 없습니다.", userId), HttpStatus.NOT_FOUND);
         }
 
         public UserNotFoundException(String email) {
-            super("USER_NOT_FOUND", String.format("ID가 %s인 회원을 찾을 수 없습니다.", email), HttpStatus.NOT_FOUND);
+            super("USER_NOT_FOUND", String.format("ID가 " + email + "인 회원을 찾을 수 없습니다.", email), HttpStatus.NOT_FOUND);
         }
     }
 

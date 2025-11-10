@@ -59,4 +59,12 @@ public class ChatParticipant {
             joinedAt = LocalDateTime.now();
         }
     }
+
+    public static ChatParticipant create(ChatRoom chatRoom, User user) {
+        return ChatParticipant.builder()
+                .chatRoom(chatRoom)
+                .user(user)
+                .build();
+
+    }
 }

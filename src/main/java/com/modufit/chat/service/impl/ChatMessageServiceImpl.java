@@ -1,0 +1,78 @@
+package com.modufit.chat.service.impl;
+
+import com.modufit.chat.dto.ChatRequestDto;
+import com.modufit.chat.dto.ChatResponseDto;
+import com.modufit.chat.dto.enums.MessageType;
+import com.modufit.chat.entity.ChatMessage;
+import com.modufit.chat.entity.ChatRoom;
+import com.modufit.chat.repository.ChatMessageRepository;
+import com.modufit.chat.repository.ChatRoomRepository;
+import com.modufit.chat.service.ChatMessageService;
+import com.modufit.common.exception.business.ChatExceptions;
+import com.modufit.common.exception.business.UserExceptions;
+import com.modufit.users.entity.User;
+import com.modufit.users.repository.UserRepository;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
+
+@Service
+@RequiredArgsConstructor
+@Transactional(readOnly = true)
+@Slf4j
+public class ChatMessageServiceImpl implements ChatMessageService {
+
+    private final ChatMessageRepository chatMessageRepository;
+    private final ChatRoomRepository chatRoomRepository;
+    private final UserRepository userRepository;
+
+    @Override
+    @Transactional
+    public ChatResponseDto saveMessage(ChatRequestDto messageDto) {
+        ChatRoom room = chatRoomRepository.findById(messageDto.getChatRoomId())
+                .orElseThrow(() -> new ChatExceptions.ChatRoomNotFoundException(messageDto.getChatRoomId()));
+
+        User sender = userRepository.findById(messageDto.getSenderId())
+                .orElseThrow(() -> new UserExceptions.UserNotFoundException(messageDto.getSenderId()));
+
+        ChatMessage chat = ChatMessage.of(messageDto.getMessage(), sender, room);
+        ChatMessage saved = chatMessageRepository.save(chat);
+
+        ChatResponseDto sendMessage = createFromEntity(saved);
+        sendMessage.setMessageType(MessageType.TALK);
+
+        return sendMessage;
+    }
+
+    @Override
+    public List<ChatResponseDto> getMessagesAfter(Long chatRoomId, LocalDateTime afterTime, int limit) {
+        List<ChatMessage> messages = chatMessageRepository
+                .findByChatRoom_RoomIdAndSentAtAfterOrderBySentAtAsc(chatRoomId, afterTime);
+
+        return messages.stream()
+                .limit(limit)
+                .map(this::createFromEntity)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public Long getMessageCount(Long chatRoomId) {
+        return chatMessageRepository.countByChatRoom_RoomId(chatRoomId);
+    }
+
+    private ChatResponseDto createFromEntity(ChatMessage message) {
+        return ChatResponseDto.builder()
+                .chatRoomId(message.getChatRoom().getRoomId())
+                .senderId(message.getSender().getUserId())
+                .senderName(message.getSender().getUserProfile().getUserName())
+                .message(message.getMessage())
+                .sendTime(message.getSentAt())
+                .build();
+    }
+}
