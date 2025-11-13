@@ -44,4 +44,12 @@ public class ChatRoom extends BaseTimeEntity {
     @OneToMany(mappedBy = "chatRoom", cascade = CascadeType.ALL)
     @Builder.Default
     private List<ChatMessage> messages = new ArrayList<>();
+
+    public static ChatRoom of(FacilitySchedule schedule, Facility facility, String roomName) {
+        return ChatRoom.builder()
+                .schedule(schedule)
+                .facility(facility)
+                .roomName(roomName)
+                .build();
+    }
 }
