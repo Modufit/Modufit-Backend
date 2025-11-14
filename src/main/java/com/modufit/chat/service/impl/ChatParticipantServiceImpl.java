@@ -4,8 +4,10 @@ package com.modufit.chat.service.impl;
 import com.modufit.chat.dto.ChatRequestDto;
 import com.modufit.chat.dto.ChatResponseDto;
 import com.modufit.chat.dto.enums.MessageType;
+import com.modufit.chat.entity.ChatMessage;
 import com.modufit.chat.entity.ChatParticipant;
 import com.modufit.chat.entity.ChatRoom;
+import com.modufit.chat.repository.ChatMessageRepository;
 import com.modufit.chat.repository.ChatParticipantRepository;
 import com.modufit.chat.repository.ChatRoomRepository;
 import com.modufit.chat.service.ChatParticipantService;
@@ -28,6 +30,7 @@ public class ChatParticipantServiceImpl implements ChatParticipantService {
     private final ChatParticipantRepository chatParticipantRepository;
     private final ChatRoomRepository chatRoomRepository;
     private final UserRepository userRepository;
+    private final ChatMessageRepository chatMessageRepository;
 
     @Override
     @Transactional
@@ -84,13 +87,24 @@ public class ChatParticipantServiceImpl implements ChatParticipantService {
         );
     }
 
+    @Override
+    public void leftAtParticipant(Long chatRoomId, Long participantId) {
+        ChatParticipant participant = chatParticipantRepository.findByChatRoom_RoomIdAndParticipantId(chatRoomId, participantId)
+                .orElseThrow(() -> new ParticipantExceptions.ParticipantNotFoundException(chatRoomId, participantId));
+
+        ChatMessage message = chatMessageRepository.findTopByChatRoom_RoomIdOrderBySentAtDesc(chatRoomId);
+        participant.updateLeftAt(LocalDateTime.now(), message.getMessageId());
+
+        chatParticipantRepository.save(participant);
+    }
+
     private ChatRoom getChatRoom(Long chatRoomId) {
         return chatRoomRepository.findById(chatRoomId)
                 .orElseThrow(() -> new ChatExceptions.ChatRoomNotFoundException(chatRoomId));
     }
 
     private User getUser(Long userId) {
-        return userRepository.findById(userId)
+        return userRepository.findWithProfile(userId)
                 .orElseThrow(() -> new UserExceptions.UserNotFoundException(userId));
     }
 

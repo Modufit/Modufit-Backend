@@ -21,6 +21,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -69,9 +70,10 @@ public class ChatRoomServiceImpl implements ChatRoomService {
                     .roomId(chatParticipant.getChatRoom().getRoomId())
                     .maxParticipants(chatParticipant.getChatRoom().getSchedule().getMaxParticipants())
                     .currentParticipants(chatParticipant.getChatRoom().getSchedule().getCurrentParticipants())
-                    .unreadMessages(unReadMessageNum)
-                    .message(message.getMessage())
-                    .sentTime(message.getSentAt())
+                    .unreadMessagesCount(unReadMessageNum)
+                    .message(message==null?"대화가 없습니다.":message.getMessage())
+                    .sentTime(message==null?null:message.getSentAt())
+                    .isActive(chatParticipant.getChatRoom().getIsActive())
                     .build();
 
             chatRoomResponseDtoList.add(chatRoomResponseDto);

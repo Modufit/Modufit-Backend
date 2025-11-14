@@ -60,6 +60,11 @@ public class ChatParticipant {
         }
     }
 
+    public void updateLeftAt(LocalDateTime leftAt, Long lastReadMessageId) {
+        this.leftAt = leftAt;
+        this.lastReadMessageId = lastReadMessageId;
+    }
+
     public static ChatParticipant create(ChatRoom chatRoom, User user) {
         return ChatParticipant.builder()
                 .chatRoom(chatRoom)

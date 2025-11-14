@@ -8,16 +8,12 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface ChatMessageRepository extends JpaRepository<ChatMessage, Long> {
-    List<ChatMessage> findByChatRoom_RoomIdAndSentAtAfterOrderBySentAtAsc(
-            Long chatRoomId,
-            LocalDateTime afterTime
-    );
+    List<ChatMessage> findByChatRoom_RoomIdAndSentAtAfterOrderBySentAtAsc(Long chatRoomId, LocalDateTime afterTime);
     Long countByChatRoom_RoomId(Long chatRoomId);
-    void deleteBySender_UserId(Long senderId);
-    void deleteByChatRoom_RoomId(Long chatRoomId);
 
     @Query("SELECT COUNT(m) FROM ChatMessage m " +
             "WHERE m.chatRoom.roomId = :roomId " +
@@ -26,4 +22,6 @@ public interface ChatMessageRepository extends JpaRepository<ChatMessage, Long> 
                              @Param("lastReadMessageId") Long lastReadMessageId);
 
     ChatMessage findTopByChatRoom_RoomIdOrderBySentAtDesc(Long chatRoomId);
+
+    void deleteBySender_UserId(Long senderId);
 }

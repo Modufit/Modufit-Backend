@@ -3,6 +3,7 @@ package com.modufit.chat.controller;
 import com.modufit.chat.dto.ChatResponseDto;
 import com.modufit.chat.dto.ChatRoomResponseDto;
 import com.modufit.chat.service.ChatMessageService;
+import com.modufit.chat.service.ChatParticipantService;
 import com.modufit.chat.service.ChatRoomService;
 import com.modufit.common.ApiResponse;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +20,7 @@ public class ChatRoomController {
 
     private final ChatMessageService chatMessageService;
     private final ChatRoomService chatRoomService;
+    private final ChatParticipantService participantService;
 
     @GetMapping("/{chatRoomId}/messages/after")
     public ResponseEntity<ApiResponse<List<ChatResponseDto>>> getMessagesAfter(
@@ -29,9 +31,17 @@ public class ChatRoomController {
         return ResponseEntity.ok(ApiResponse.success("채팅방의 이전 메시지 목록 조회", messages));
     }
 
-    @GetMapping("/{userId}")
+    @GetMapping("/users/{userId}/list")
     public ResponseEntity<ApiResponse<List<ChatRoomResponseDto>>> getUserChatRooms(@PathVariable Long userId) {
         List<ChatRoomResponseDto> chatRooms = chatRoomService.getChatRooms(userId);
         return ResponseEntity.ok(ApiResponse.success("사용자 채팅방 목록 조회", chatRooms));
+    }
+
+    @PutMapping("/{chatRoomId}/participants/{participantId}")
+    public ResponseEntity<ApiResponse<Void>> leftAtParticipant(
+            @PathVariable Long chatRoomId, @PathVariable Long participantId) {
+        participantService.leftAtParticipant(chatRoomId, participantId);
+
+        return ResponseEntity.ok().build();
     }
 }
