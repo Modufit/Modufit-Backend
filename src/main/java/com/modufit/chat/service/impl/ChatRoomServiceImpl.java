@@ -7,7 +7,9 @@ import com.modufit.chat.entity.ChatRoom;
 import com.modufit.chat.repository.ChatMessageRepository;
 import com.modufit.chat.repository.ChatParticipantRepository;
 import com.modufit.chat.repository.ChatRoomRepository;
+import com.modufit.chat.repository.customer.ChatRoomCustomerRepository;
 import com.modufit.chat.service.ChatRoomService;
+import com.modufit.common.exception.business.ChatExceptions;
 import com.modufit.common.exception.business.FacilityExceptions;
 import com.modufit.common.exception.business.UserExceptions;
 import com.modufit.facility.entity.Facility;
@@ -19,9 +21,7 @@ import com.modufit.users.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -32,14 +32,12 @@ public class ChatRoomServiceImpl implements ChatRoomService {
     private final ChatMessageRepository chatMessageRepository;
     private final FacilityRepository facilityRepository;
     private final FacilityScheduleRepository facilityScheduleRepository;
+    private final ChatRoomCustomerRepository chatRoomCustomerRepository;
 
     @Override
     public void createChatRoom(Long facilityId, Long scheduleId) {
-        Facility facility = facilityRepository.findByFacilityId(facilityId)
-                .orElseThrow(() -> new FacilityExceptions.FacilityNotFoundException(facilityId));
-
-        FacilitySchedule facilitySchedule = facilityScheduleRepository.findByFacility_FacilityIdAndScheduleId(facilityId, scheduleId)
-                .orElseThrow(() -> new FacilityExceptions.FacilityNotFoundException(scheduleId));
+        Facility facility = getFacility(facilityId);
+        FacilitySchedule facilitySchedule = getFacilitySchedule(facilityId, scheduleId);
 
         String chatRoomName = facility.getFacilityName() + "(" + facility.getFacilityType() + ")";
         ChatRoom chatRoom = ChatRoom.of(facilitySchedule, facility, chatRoomName);
@@ -48,45 +46,32 @@ public class ChatRoomServiceImpl implements ChatRoomService {
     }
 
     @Override
-    public void closedChatRoom(Long roomId, Long facilityId, Long scheduleId) {
-
+    public List<ChatRoomResponseDto> getChatRooms(Long userId) {
+        User user = getUser(userId);
+        return chatRoomCustomerRepository.findChatRooms(userId);
     }
 
     @Override
-    public List<ChatRoomResponseDto> getChatRooms(Long userId) {
-        User user = userRepository.findById(userId)
+    public Long getChatRoomCount(Long userId) {
+        User user = getUser(userId);
+        return chatParticipantRepository.countByUser_UserId(userId);
+    }
+
+    private Facility getFacility(Long facilityId) {
+        return facilityRepository.findByFacilityId(facilityId)
+                .orElseThrow(() -> new FacilityExceptions.FacilityNotFoundException(facilityId));
+
+    }
+
+    private FacilitySchedule getFacilitySchedule(Long facilityId, Long scheduleId) {
+        return facilityScheduleRepository.findByFacility_FacilityIdAndScheduleId(facilityId, scheduleId)
+                .orElseThrow(() -> new FacilityExceptions.FacilityNotFoundException(scheduleId));
+
+    }
+
+    private User getUser(Long userId) {
+        return userRepository.findWithProfile(userId)
                 .orElseThrow(() -> new UserExceptions.UserNotFoundException(userId));
-
-        List<ChatParticipant> participantList = chatParticipantRepository.findByUser_userId(userId);
-
-        List<ChatRoomResponseDto> chatRoomResponseDtoList = new ArrayList<>();
-        for (ChatParticipant chatParticipant : participantList) {
-            long unReadMessageNum = countUnReadMessages(chatParticipant.getChatRoom().getRoomId(), chatParticipant.getLastReadMessageId());
-            ChatMessage message = currentMessage(chatParticipant.getChatRoom().getRoomId());
-
-            ChatRoomResponseDto chatRoomResponseDto
-                    = ChatRoomResponseDto.builder()
-                    .roomName(chatParticipant.getChatRoom().getRoomName())
-                    .roomId(chatParticipant.getChatRoom().getRoomId())
-                    .maxParticipants(chatParticipant.getChatRoom().getSchedule().getMaxParticipants())
-                    .currentParticipants(chatParticipant.getChatRoom().getSchedule().getCurrentParticipants())
-                    .unreadMessagesCount(unReadMessageNum)
-                    .message(message==null?"대화가 없습니다.":message.getMessage())
-                    .sentTime(message==null?null:message.getSentAt())
-                    .isActive(chatParticipant.getChatRoom().getIsActive())
-                    .build();
-
-            chatRoomResponseDtoList.add(chatRoomResponseDto);
-        }
-
-        return chatRoomResponseDtoList;
     }
 
-    private Long countUnReadMessages(Long chatRoomId, Long lastReadMessageId) {
-        return chatMessageRepository.countUnreadMessages(chatRoomId, lastReadMessageId);
-    }
-
-    private ChatMessage currentMessage(Long chatRoomId) {
-        return chatMessageRepository.findTopByChatRoom_RoomIdOrderBySentAtDesc(chatRoomId);
-    }
 }

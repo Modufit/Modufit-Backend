@@ -14,5 +14,5 @@ public interface ChatParticipantRepository extends CrudRepository<ChatParticipan
     Optional<ChatParticipant> findByChatRoom_RoomIdAndUser_UserId(Long chatRoomId, Long userId);
     Optional<ChatParticipant> findByChatRoom_RoomIdAndParticipantId(Long chatRoomId, Long participantId);
 
-    List<ChatParticipant> findByUser_userId(Long userId);
+    Long countByUser_UserId(Long userId);
 }
