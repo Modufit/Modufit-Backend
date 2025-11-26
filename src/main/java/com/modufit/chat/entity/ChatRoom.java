@@ -22,11 +22,7 @@ public class ChatRoom extends BaseTimeEntity {
     @Column(name = "room_id")
     private Long roomId;
 
-    @OneToOne
-    @JoinColumn(name = "schedule_id", unique = true, nullable = false)
-    private FacilitySchedule schedule;
-
-    @ManyToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "facility_id", nullable = false)
     private Facility facility;
 
@@ -45,9 +41,8 @@ public class ChatRoom extends BaseTimeEntity {
     @Builder.Default
     private List<ChatMessage> messages = new ArrayList<>();
 
-    public static ChatRoom of(FacilitySchedule schedule, Facility facility, String roomName) {
+    public static ChatRoom of(Facility facility, String roomName) {
         return ChatRoom.builder()
-                .schedule(schedule)
                 .facility(facility)
                 .roomName(roomName)
                 .build();

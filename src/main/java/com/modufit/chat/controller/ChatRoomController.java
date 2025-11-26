@@ -1,7 +1,8 @@
 package com.modufit.chat.controller;
 
 import com.modufit.chat.dto.ChatResponseDto;
-import com.modufit.chat.dto.ChatRoomResponseDto;
+import com.modufit.chat.dto.ChatRoomDetailResponseDto;
+import com.modufit.chat.dto.PageChatRoomResponseDto;
 import com.modufit.chat.service.ChatMessageService;
 import com.modufit.chat.service.ChatParticipantService;
 import com.modufit.chat.service.ChatRoomService;
@@ -10,7 +11,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
@@ -22,18 +22,38 @@ public class ChatRoomController {
     private final ChatRoomService chatRoomService;
     private final ChatParticipantService participantService;
 
-    @GetMapping("/{chatRoomId}/messages/after")
-    public ResponseEntity<ApiResponse<List<ChatResponseDto>>> getMessagesAfter(
+    @GetMapping("/{chatRoomId}/messages/recent")
+    public ResponseEntity<ApiResponse<List<ChatResponseDto>>> getRecentMessages(
             @PathVariable Long chatRoomId,
-            @RequestParam LocalDateTime afterTime,
-            @RequestParam(defaultValue = "50") int limit) {
-        List<ChatResponseDto> messages = chatMessageService.getMessagesAfter(chatRoomId, afterTime, limit);
+            @RequestParam(defaultValue = "30") int limit){
+        List<ChatResponseDto> messages = chatMessageService.getMessages(chatRoomId, limit);
         return ResponseEntity.ok(ApiResponse.success("채팅방의 이전 메시지 목록 조회", messages));
     }
 
+    @GetMapping("/{chatRoomId}/messages/before")
+    public ResponseEntity<ApiResponse<List<ChatResponseDto>>> getMessagesAfter(
+            @PathVariable Long chatRoomId,
+            @RequestParam Long lastMessageId,
+            @RequestParam(defaultValue = "30") int limit) {
+        List<ChatResponseDto> messages = chatMessageService.getMessagesBefore(chatRoomId, lastMessageId, limit);
+        return ResponseEntity.ok(ApiResponse.success("채팅방의 이전 메시지 목록 조회", messages));
+    }
+
+    @GetMapping("/{chatRoomId}")
+    public ResponseEntity<ApiResponse<ChatRoomDetailResponseDto>> getChatRoomParticipants(
+            @PathVariable Long chatRoomId
+    ) {
+        ChatRoomDetailResponseDto participants = chatRoomService.getChatRoomDetail(chatRoomId);
+        return ResponseEntity.ok(ApiResponse.success("채팅방 상세 조회", participants));
+    }
+
     @GetMapping("/users/{userId}/list")
-    public ResponseEntity<ApiResponse<List<ChatRoomResponseDto>>> getUserChatRooms(@PathVariable Long userId) {
-        List<ChatRoomResponseDto> chatRooms = chatRoomService.getChatRooms(userId);
+    public ResponseEntity<ApiResponse<PageChatRoomResponseDto>> getUserChatRooms(
+            @PathVariable Long userId,
+            @RequestParam(defaultValue = "0", required = false) int page,
+            @RequestParam(defaultValue = "8", required = false) int size
+    ) {
+        PageChatRoomResponseDto chatRooms = chatRoomService.getUserChatRooms(userId, page, size);
         return ResponseEntity.ok(ApiResponse.success("사용자 채팅방 목록 조회", chatRooms));
     }
 

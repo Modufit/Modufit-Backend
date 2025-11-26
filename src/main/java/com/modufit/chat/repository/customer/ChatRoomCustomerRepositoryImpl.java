@@ -1,6 +1,6 @@
 package com.modufit.chat.repository.customer;
 
-import com.modufit.chat.dto.ChatRoomResponseDto;
+import com.modufit.chat.dto.ChatRoomListItemDto;
 import com.modufit.chat.entity.QChatMessage;
 import com.modufit.chat.entity.QChatParticipant;
 import com.modufit.chat.entity.QChatRoom;
@@ -11,6 +11,7 @@ import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
@@ -23,7 +24,7 @@ public class ChatRoomCustomerRepositoryImpl implements ChatRoomCustomerRepositor
     private final JPAQueryFactory jpaQueryFactory;
 
     @Override
-    public List<ChatRoomResponseDto> findChatRooms(long userId) {
+    public List<ChatRoomListItemDto> findChatRooms(long userId, Pageable pageable) {
         QChatParticipant p = QChatParticipant.chatParticipant;
         QChatRoom room = QChatRoom.chatRoom;
         QFacilitySchedule schedule = QFacilitySchedule.facilitySchedule;
@@ -52,11 +53,9 @@ public class ChatRoomCustomerRepositoryImpl implements ChatRoomCustomerRepositor
 
         return jpaQueryFactory
                 .select(Projections.constructor(
-                        ChatRoomResponseDto.class,
+                        ChatRoomListItemDto.class,
                         room.roomId,
                         room.roomName,
-                        schedule.currentParticipants,
-                        schedule.maxParticipants,
                         unreadCount,
                         latestMessageText,
                         latestMessageTime,
@@ -64,8 +63,9 @@ public class ChatRoomCustomerRepositoryImpl implements ChatRoomCustomerRepositor
                 ))
                 .from(p)
                 .join(p.chatRoom, room)
-                .join(room.schedule, schedule)
                 .where(p.user.userId.eq(userId))
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize())
                 .orderBy(
                         Expressions.dateTimeTemplate(LocalDateTime.class,
                                 "GREATEST({0}, {1})",

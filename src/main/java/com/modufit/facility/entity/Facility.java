@@ -1,5 +1,6 @@
 package com.modufit.facility.entity;
 
+import com.modufit.chat.entity.ChatRoom;
 import com.modufit.common.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -46,23 +47,21 @@ public class Facility extends BaseTimeEntity {
     @Column(nullable = false, length = 100)
     private String region;
 
-    @Column(name = "operating_start_time", nullable = false)
-    private LocalTime operatingStartTime;
-
-    @Column(name = "operating_end_time", nullable = false)
-    private LocalTime operatingEndTime;
-
-    @Column
-    private Double latitude;
-
-    @Column
-    private Double longitude;
+    @Column(name = "open_weekday", nullable = false)
+    private LocalTime openWeekday;
 
     @Column(name = "is_active")
     @Builder.Default
     private Boolean isActive = true;
 
+    @OneToOne(mappedBy = "facility", cascade = CascadeType.ALL)
+    private ChatRoom chatRoom;
+
     @OneToMany(mappedBy = "facility", cascade = CascadeType.ALL)
     @Builder.Default
     private List<FacilitySchedule> schedules = new ArrayList<>();
+
+    @OneToMany(mappedBy = "facility", cascade = CascadeType.ALL)
+    @Builder.Default
+    private List<FacilityProgram> programs = new ArrayList<>();
 }

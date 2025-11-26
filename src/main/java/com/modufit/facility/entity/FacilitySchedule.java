@@ -1,6 +1,5 @@
 package com.modufit.facility.entity;
 
-import com.modufit.chat.entity.ChatRoom;
 import com.modufit.common.BaseTimeEntity;
 import com.modufit.facility.entity.enums.ScheduleStatus;
 import jakarta.persistence.*;
@@ -64,8 +63,5 @@ public class FacilitySchedule extends BaseTimeEntity {
     @Column(nullable = false)
     @Builder.Default
     private ScheduleStatus status = ScheduleStatus.AVAILABLE;
-
-    @OneToOne(mappedBy = "schedule", cascade = CascadeType.ALL)
-    private ChatRoom chatRoom;
 
 }

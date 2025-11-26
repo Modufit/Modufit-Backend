@@ -1,8 +1,9 @@
 package com.modufit.chat.service.impl;
 
-import com.modufit.chat.dto.ChatRoomResponseDto;
-import com.modufit.chat.entity.ChatMessage;
-import com.modufit.chat.entity.ChatParticipant;
+import com.modufit.chat.dto.ChatParticipantListItemDto;
+import com.modufit.chat.dto.ChatRoomListItemDto;
+import com.modufit.chat.dto.ChatRoomDetailResponseDto;
+import com.modufit.chat.dto.PageChatRoomResponseDto;
 import com.modufit.chat.entity.ChatRoom;
 import com.modufit.chat.repository.ChatMessageRepository;
 import com.modufit.chat.repository.ChatParticipantRepository;
@@ -12,13 +13,14 @@ import com.modufit.chat.service.ChatRoomService;
 import com.modufit.common.exception.business.ChatExceptions;
 import com.modufit.common.exception.business.FacilityExceptions;
 import com.modufit.common.exception.business.UserExceptions;
+import com.modufit.facility.dto.FacilitySummaryDto;
 import com.modufit.facility.entity.Facility;
-import com.modufit.facility.entity.FacilitySchedule;
 import com.modufit.facility.repository.FacilityRepository;
-import com.modufit.facility.repository.FacilityScheduleRepository;
 import com.modufit.users.entity.User;
 import com.modufit.users.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -31,47 +33,71 @@ public class ChatRoomServiceImpl implements ChatRoomService {
     private final ChatParticipantRepository chatParticipantRepository;
     private final ChatMessageRepository chatMessageRepository;
     private final FacilityRepository facilityRepository;
-    private final FacilityScheduleRepository facilityScheduleRepository;
     private final ChatRoomCustomerRepository chatRoomCustomerRepository;
 
     @Override
-    public void createChatRoom(Long facilityId, Long scheduleId) {
+    public void createChatRoom(Long facilityId) {
         Facility facility = getFacility(facilityId);
-        FacilitySchedule facilitySchedule = getFacilitySchedule(facilityId, scheduleId);
 
         String chatRoomName = facility.getFacilityName() + "(" + facility.getFacilityType() + ")";
-        ChatRoom chatRoom = ChatRoom.of(facilitySchedule, facility, chatRoomName);
+        ChatRoom chatRoom = ChatRoom.of(facility, chatRoomName);
 
         chatRoomRepository.save(chatRoom);
     }
 
     @Override
-    public List<ChatRoomResponseDto> getChatRooms(Long userId) {
+    public PageChatRoomResponseDto getUserChatRooms(Long userId, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
         User user = getUser(userId);
-        return chatRoomCustomerRepository.findChatRooms(userId);
+
+        List<ChatRoomListItemDto> chatRoomList = chatRoomCustomerRepository.findChatRooms(userId, pageable);
+        Long roomCount = getChatRoomCount(userId);
+
+        return PageChatRoomResponseDto.builder()
+                .chatRooms(chatRoomList)
+                .roomCount(roomCount)
+                .build();
     }
 
     @Override
-    public Long getChatRoomCount(Long userId) {
-        User user = getUser(userId);
+    public ChatRoomDetailResponseDto getChatRoomDetail(Long chatRoomId) {
+        ChatRoom room = getChatRoomWithFacility(chatRoomId);
+        List<ChatParticipantListItemDto> participant = chatParticipantRepository.findChatUsers(chatRoomId);
+
+        return ChatRoomDetailResponseDto.builder()
+                .roomId(room.getRoomId())
+                .roomName(room.getRoomName())
+                .facilitySummary(createFromFacility(room.getFacility()))
+                .participantCount(participant.size())
+                .participants(participant)
+                .build();
+    }
+
+    private Long getChatRoomCount(Long userId) {
         return chatParticipantRepository.countByUser_UserId(userId);
     }
 
     private Facility getFacility(Long facilityId) {
         return facilityRepository.findByFacilityId(facilityId)
                 .orElseThrow(() -> new FacilityExceptions.FacilityNotFoundException(facilityId));
-
-    }
-
-    private FacilitySchedule getFacilitySchedule(Long facilityId, Long scheduleId) {
-        return facilityScheduleRepository.findByFacility_FacilityIdAndScheduleId(facilityId, scheduleId)
-                .orElseThrow(() -> new FacilityExceptions.FacilityNotFoundException(scheduleId));
-
     }
 
     private User getUser(Long userId) {
         return userRepository.findWithProfile(userId)
                 .orElseThrow(() -> new UserExceptions.UserNotFoundException(userId));
+    }
+
+    private ChatRoom getChatRoomWithFacility(Long chatRoomId) {
+        return chatRoomRepository.findWithFacility(chatRoomId)
+                .orElseThrow(() -> new ChatExceptions.ChatRoomNotFoundException(chatRoomId));
+    }
+
+    private FacilitySummaryDto createFromFacility(Facility facility) {
+        return FacilitySummaryDto.builder()
+                .facilityId(facility.getFacilityId())
+                .facilityName(facility.getFacilityName())
+                .facilityType(facility.getFacilityType())
+                .build();
     }
 
 }

@@ -9,6 +9,6 @@ import java.util.List;
 
 public interface ChatMessageService {
     ChatResponseDto saveMessage(ChatRequestDto messageDto);
-    List<ChatResponseDto> getMessagesAfter(Long chatRoomId, LocalDateTime afterTime, int limit);
-    Long getMessageCount(Long chatRoomId);
+    List<ChatResponseDto> getMessagesBefore(Long chatRoomId, Long lastMessageId, int limit);
+    List<ChatResponseDto> getMessages(Long chatRoomId, int limit);
 }
