@@ -14,11 +14,11 @@ import com.modufit.users.entity.User;
 import com.modufit.users.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -44,16 +44,13 @@ public class ChatMessageServiceImpl implements ChatMessageService {
         ChatMessage chat = ChatMessage.of(messageDto.getMessage(), sender, room);
         ChatMessage saved = chatMessageRepository.save(chat);
 
-        ChatResponseDto sendMessage = createFromEntity(saved);
-        sendMessage.setMessageType(MessageType.TALK);
-
-        return sendMessage;
+        return createFromEntity(saved);
     }
 
     @Override
-    public List<ChatResponseDto> getMessagesAfter(Long chatRoomId, LocalDateTime afterTime, int limit) {
-        List<ChatMessage> messages = chatMessageRepository
-                .findByChatRoom_RoomIdAndSentAtAfterOrderBySentAtAsc(chatRoomId, afterTime);
+    public List<ChatResponseDto> getMessagesBefore(Long chatRoomId, Long lastMessageId, int limit) {
+        Pageable pageable = PageRequest.of(0, limit);
+        List<ChatMessage> messages = chatMessageRepository.getMessagesBefore(chatRoomId, lastMessageId, pageable);
 
         return messages.stream()
                 .limit(limit)
@@ -62,12 +59,19 @@ public class ChatMessageServiceImpl implements ChatMessageService {
     }
 
     @Override
-    public Long getMessageCount(Long chatRoomId) {
-        return chatMessageRepository.countByChatRoom_RoomId(chatRoomId);
+    public List<ChatResponseDto> getMessages(Long chatRoomId, int limit) {
+        Pageable pageable = PageRequest.of(0, limit);
+        List<ChatMessage> messages = chatMessageRepository.getRecentMessages(chatRoomId, pageable);
+
+        return messages.stream()
+                .limit(limit)
+                .map(this::createFromEntity)
+                .collect(Collectors.toList());
     }
 
     private ChatResponseDto createFromEntity(ChatMessage message) {
         return ChatResponseDto.builder()
+                .messageType(MessageType.TALK)
                 .chatRoomId(message.getChatRoom().getRoomId())
                 .senderId(message.getSender().getUserId())
                 .senderName(message.getSender().getUserProfile().getUserName())

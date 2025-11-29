@@ -42,8 +42,8 @@ public class ChatParticipant {
     @Column(name = "joined_at", updatable = false)
     private LocalDateTime joinedAt;
 
-    @Column(name = "left_at")
-    private LocalDateTime leftAt;
+    @Column(name = "last_visited_at")
+    private LocalDateTime lastVisitedAt;
 
     @Column(name = "is_active")
     @Builder.Default
@@ -58,6 +58,11 @@ public class ChatParticipant {
         if (joinedAt == null) {
             joinedAt = LocalDateTime.now();
         }
+    }
+
+    public void updateLeftAt(LocalDateTime lastVisitedAt, Long lastReadMessageId) {
+        this.lastVisitedAt = lastVisitedAt;
+        this.lastReadMessageId = lastReadMessageId;
     }
 
     public static ChatParticipant create(ChatRoom chatRoom, User user) {

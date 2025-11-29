@@ -11,12 +11,11 @@ import java.time.LocalDateTime;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class ChatRoomResponseDto {
+public class ChatRoomListItemDto {
     public Long roomId;
     private String roomName;
-    private Integer currentParticipants;
-    private Integer maxParticipants;
-    private Long unreadMessages;
+    private Long unreadMessagesCount;
     private String message;
     private LocalDateTime sentTime;
+    private Boolean isActive;
 }
