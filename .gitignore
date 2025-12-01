@@ -38,4 +38,4 @@ out/
 
 ### secret File ###
 application-secret.properties
-src/main/resources/application-secret.properties
+src/main/resources/static/application-secret.properties
