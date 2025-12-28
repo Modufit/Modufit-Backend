@@ -9,9 +9,12 @@ import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.SubQueryExpression;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.JPAExpressions;
+import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.support.PageableExecutionUtils;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
@@ -24,10 +27,9 @@ public class ChatRoomCustomerRepositoryImpl implements ChatRoomCustomerRepositor
     private final JPAQueryFactory jpaQueryFactory;
 
     @Override
-    public List<ChatRoomListItemDto> findChatRooms(long userId, Pageable pageable) {
+    public Page<ChatRoomListItemDto> findChatRooms(long userId, Pageable pageable) {
         QChatParticipant p = QChatParticipant.chatParticipant;
         QChatRoom room = QChatRoom.chatRoom;
-        QFacilitySchedule schedule = QFacilitySchedule.facilitySchedule;
         QChatMessage message = QChatMessage.chatMessage;
 
         SubQueryExpression<Long> unreadCount = JPAExpressions
@@ -51,7 +53,7 @@ public class ChatRoomCustomerRepositoryImpl implements ChatRoomCustomerRepositor
                                 .and(message.sentAt.eq(latestMessageTime))
                 );
 
-        return jpaQueryFactory
+        List<ChatRoomListItemDto> content = jpaQueryFactory
                 .select(Projections.constructor(
                         ChatRoomListItemDto.class,
                         room.roomId,
@@ -72,8 +74,13 @@ public class ChatRoomCustomerRepositoryImpl implements ChatRoomCustomerRepositor
                                 p.lastVisitedAt,
                                 Expressions.asDateTime(latestMessageTime)
                         ).desc()
-                )
-                .fetch();
-    }
+                ).fetch();
 
+        JPAQuery<Long> countQuery = jpaQueryFactory
+                .select(p.count())
+                .from(p)
+                .where(p.user.userId.eq(userId));
+
+        return PageableExecutionUtils.getPage(content, pageable, countQuery::fetchOne);
+    }
 }

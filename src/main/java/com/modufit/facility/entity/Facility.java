@@ -9,16 +9,15 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.EqualsAndHashCode;
 
-import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 
 @Entity
 @Table(name = "facilities", indexes = {
-        @Index(name = "idx_region", columnList = "region"),
+        @Index(name = "idx_sido_name", columnList = "sido_name"),
+        @Index(name = "idx_sigungu_name", columnList = "sigungu_name"),
         @Index(name = "idx_sport_type", columnList = "sport_type"),
         @Index(name = "idx_facility_name", columnList = "facility_name"),
-        @Index(name = "idx_location", columnList = "latitude, longitude")
 })
 @Data
 @EqualsAndHashCode(callSuper = true)
@@ -44,11 +43,14 @@ public class Facility extends BaseTimeEntity {
     @Column(nullable = false, length = 500)
     private String address;
 
-    @Column(nullable = false, length = 100)
-    private String region;
+    @Column(name = "sido_name", nullable = false, length = 100)
+    private String sidoName;
+
+    @Column(name = "sigungu_name", nullable = false, length = 100)
+    private String sigunguName;
 
     @Column(name = "open_weekday", nullable = false)
-    private LocalTime openWeekday;
+    private String openWeekday;
 
     @Column(name = "is_active")
     @Builder.Default

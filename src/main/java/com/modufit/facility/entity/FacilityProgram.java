@@ -24,31 +24,30 @@ public class FacilityProgram extends BaseTimeEntity {
     @JoinColumn(name = "facility_id", nullable = false)
     private Facility facility;
 
-    @Column(name = "progrm_ty_nm", length = 200)
+    @Column(name = "program_type", length = 200)
     private String programType;
 
-    @Column(name = "progrm_nm", length = 200, nullable = false)
+    @Column(name = "program_name", length = 200, nullable = false)
     private String programName;
 
-    @Column(name = "progrm_trget_nm", length = 200)
+    @Column(name = "program_target", length = 200)
     private String programTarget;
 
-    @Column(name = "progrm_begin_de")
+    @Column(name = "begin_date")
     private LocalDate beginDate;
 
-    @Column(name = "progrm_end_de")
+    @Column(name = "end_date")
     private LocalDate endDate;
 
-    @Column(name = "progrm_estbl_wkday_nm", length = 200)
+    @Column(name = "open_weekday", length = 200)
     private String openWeekday;
 
-    @Column(name = "progrm_estbl_tizn_value", length = 200)
+    @Column(name = "time_zone_value", length = 200)
     private String timeZoneValue;
 
-    @Column(name = "progrm_rcrit_nmpr_co", precision = 38, scale = 0)
+    @Column(name = "recruit_capacity", precision = 38)
     private BigDecimal recruitCapacity;
 
-    @Column(name = "progrm_prc", precision = 28, scale = 5)
+    @Column(name = "program_price", precision = 28, scale = 5)
     private BigDecimal programPrice;
-
 }

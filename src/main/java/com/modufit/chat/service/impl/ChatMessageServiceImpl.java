@@ -8,10 +8,12 @@ import com.modufit.chat.entity.ChatRoom;
 import com.modufit.chat.repository.ChatMessageRepository;
 import com.modufit.chat.repository.ChatRoomRepository;
 import com.modufit.chat.service.ChatMessageService;
+import com.modufit.chat.service.ChatRoomService;
 import com.modufit.common.exception.business.ChatExceptions;
 import com.modufit.common.exception.business.UserExceptions;
 import com.modufit.users.entity.User;
 import com.modufit.users.repository.UserRepository;
+import com.modufit.users.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
@@ -29,17 +31,14 @@ import java.util.stream.Collectors;
 public class ChatMessageServiceImpl implements ChatMessageService {
 
     private final ChatMessageRepository chatMessageRepository;
-    private final ChatRoomRepository chatRoomRepository;
-    private final UserRepository userRepository;
+    private final ChatRoomService chatRoomService;
+    private final UserService userService;
 
     @Override
     @Transactional
     public ChatResponseDto saveMessage(ChatRequestDto messageDto) {
-        ChatRoom room = chatRoomRepository.findById(messageDto.getChatRoomId())
-                .orElseThrow(() -> new ChatExceptions.ChatRoomNotFoundException(messageDto.getChatRoomId()));
-
-        User sender = userRepository.findById(messageDto.getSenderId())
-                .orElseThrow(() -> new UserExceptions.UserNotFoundException(messageDto.getSenderId()));
+        ChatRoom room = chatRoomService.getChatRoomById(messageDto.getChatRoomId());
+        User sender = userService.getUserWithProfile(messageDto.getSenderId());
 
         ChatMessage chat = ChatMessage.of(messageDto.getMessage(), sender, room);
         ChatMessage saved = chatMessageRepository.save(chat);

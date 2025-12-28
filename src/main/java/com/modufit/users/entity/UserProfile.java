@@ -11,7 +11,8 @@ import lombok.NoArgsConstructor;
 
 @Entity
 @Table(name = "user_profiles", indexes = {
-        @Index(name = "idx_region", columnList = "region"),
+        @Index(name = "idx_sido_name", columnList = "sido_name"),
+        @Index(name = "idx_sigungu_name", columnList = "sigungu_name"),
 })
 @Data
 @NoArgsConstructor
@@ -31,8 +32,11 @@ public class UserProfile extends BaseTimeEntity {
     @Column(name = "user_name", nullable = false, length = 100)
     private String userName;
 
-    @Column(nullable = false, length = 100)
-    private String region;
+    @Column(name = "sido_name", nullable = false, length = 100)
+    private String sidoName;
+
+    @Column(name = "sigungu_name", nullable = false, length = 100)
+    private String sigunguName;
 
     @Column(name = "sport_type", length = 100)
     private String sportType;
