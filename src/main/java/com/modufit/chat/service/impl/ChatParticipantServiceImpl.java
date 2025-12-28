@@ -1,7 +1,5 @@
 package com.modufit.chat.service.impl;
 
-
-import com.modufit.chat.dto.ChatRequestDto;
 import com.modufit.chat.dto.ChatResponseDto;
 import com.modufit.chat.dto.enums.MessageType;
 import com.modufit.chat.entity.ChatMessage;
@@ -9,13 +7,11 @@ import com.modufit.chat.entity.ChatParticipant;
 import com.modufit.chat.entity.ChatRoom;
 import com.modufit.chat.repository.ChatMessageRepository;
 import com.modufit.chat.repository.ChatParticipantRepository;
-import com.modufit.chat.repository.ChatRoomRepository;
 import com.modufit.chat.service.ChatParticipantService;
-import com.modufit.common.exception.business.ChatExceptions;
+import com.modufit.chat.service.ChatRoomService;
 import com.modufit.common.exception.business.ParticipantExceptions;
-import com.modufit.common.exception.business.UserExceptions;
 import com.modufit.users.entity.User;
-import com.modufit.users.repository.UserRepository;
+import com.modufit.users.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,17 +24,17 @@ import java.util.Optional;
 public class ChatParticipantServiceImpl implements ChatParticipantService {
 
     private final ChatParticipantRepository chatParticipantRepository;
-    private final ChatRoomRepository chatRoomRepository;
-    private final UserRepository userRepository;
+    private final ChatRoomService chatRoomService;
+    private final UserService userService;
     private final ChatMessageRepository chatMessageRepository;
 
     @Override
     @Transactional
     public ChatResponseDto enterChatRoom(Long chatRoomId, Long userId) {
-        ChatRoom room = getChatRoom(chatRoomId);
-        User user = getUser(userId);
+        ChatRoom room = chatRoomService.getChatRoomById(chatRoomId);
+        User user = userService.getUserWithProfile(userId);
 
-        ChatParticipant participant = checkChatParticipant(chatRoomId, userId);
+        ChatParticipant participant = checkChatParticipant(room, user);
 
         return createFromParams(
                 MessageType.ENTER,
@@ -48,9 +44,9 @@ public class ChatParticipantServiceImpl implements ChatParticipantService {
         );
     }
 
-    private ChatParticipant checkChatParticipant(Long chatRoomId, Long userId) {
+    private ChatParticipant checkChatParticipant(ChatRoom room, User user) {
         Optional<ChatParticipant> existing = chatParticipantRepository
-                .findByChatRoom_RoomIdAndUser_UserId(chatRoomId, userId);
+                .findByChatRoom_RoomIdAndUser_UserId(room.getRoomId(), user.getUserId());
 
         if (existing.isPresent()) {
             ChatParticipant participant = existing.get();
@@ -62,15 +58,15 @@ public class ChatParticipantServiceImpl implements ChatParticipantService {
             return participant;
         }
 
-        ChatParticipant participant = ChatParticipant.create(getChatRoom(chatRoomId), getUser(userId));
+        ChatParticipant participant = ChatParticipant.create(room, user);
         return chatParticipantRepository.save(participant);
     }
 
     @Override
     @Transactional
     public ChatResponseDto leaveChatRoom(Long chatRoomId, Long userId) {
-        ChatRoom room = getChatRoom(chatRoomId);
-        User user = getUser(userId);
+        ChatRoom room = chatRoomService.getChatRoomById(chatRoomId);
+        User user = userService.getUserWithProfile(userId);
 
         ChatParticipant participant = chatParticipantRepository
                 .findByChatRoom_RoomIdAndUser_UserId(chatRoomId, userId)
@@ -96,16 +92,6 @@ public class ChatParticipantServiceImpl implements ChatParticipantService {
         participant.updateLeftAt(LocalDateTime.now(), message.getMessageId());
 
         chatParticipantRepository.save(participant);
-    }
-
-    private ChatRoom getChatRoom(Long chatRoomId) {
-        return chatRoomRepository.findById(chatRoomId)
-                .orElseThrow(() -> new ChatExceptions.ChatRoomNotFoundException(chatRoomId));
-    }
-
-    private User getUser(Long userId) {
-        return userRepository.findWithProfile(userId)
-                .orElseThrow(() -> new UserExceptions.UserNotFoundException(userId));
     }
 
     private ChatResponseDto createFromParams(MessageType type, ChatRoom room, User user, String message) {

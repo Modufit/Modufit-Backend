@@ -34,4 +34,14 @@ public class FacilityExceptions {
             );
         }
     }
+
+    public static class FavoriteFacilityNotFoundException extends BusinessException {
+        public FavoriteFacilityNotFoundException(Long favoriteId) {
+            super(
+                    "FAVORITE_FACILITY_NOT_FOUND",
+                    "등록된 관심 시설이 없습니다. (Favorite ID: " + favoriteId + ")",
+                    HttpStatus.NOT_FOUND
+            );
+        }
+    }
 }

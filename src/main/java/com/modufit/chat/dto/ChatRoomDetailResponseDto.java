@@ -1,5 +1,6 @@
 package com.modufit.chat.dto;
 
+import com.modufit.facility.dto.FacilityDetailResponseDto;
 import com.modufit.facility.dto.FacilitySummaryDto;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
