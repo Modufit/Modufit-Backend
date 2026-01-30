@@ -1,7 +1,6 @@
 package com.modufit.facility.dto;
 
 import com.modufit.facility.entity.Facility;
-import com.modufit.facility.entity.FavoriteFacility;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

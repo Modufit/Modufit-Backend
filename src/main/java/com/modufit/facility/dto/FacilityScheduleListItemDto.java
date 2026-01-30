@@ -1,6 +1,6 @@
 package com.modufit.facility.dto;
 
-import com.modufit.facility.entity.FacilitySchedule;
+import com.modufit.facility.entity.FacilityProgramSchedule;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -23,7 +23,7 @@ public class FacilityScheduleListItemDto {
     private Integer participants;
     private Boolean isParticipating;
 
-    public static FacilityScheduleListItemDto from(FacilitySchedule schedule) {
+    public static FacilityScheduleListItemDto from(FacilityProgramSchedule schedule) {
         return FacilityScheduleListItemDto.builder()
                 .scheduleId(schedule.getScheduleId())
                 .reservationDate(schedule.getReservationDate())

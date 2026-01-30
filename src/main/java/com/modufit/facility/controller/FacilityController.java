@@ -4,9 +4,6 @@ import com.modufit.common.ApiResponse;
 import com.modufit.facility.dto.FacilityDetailResponseDto;
 import com.modufit.facility.dto.ListFacilityProgramResponseDto;
 import com.modufit.facility.dto.ListFacilityScheduleResponseDto;
-import com.modufit.facility.service.FacilityProgramService;
-import com.modufit.facility.service.FacilityScheduleService;
-import com.modufit.facility.service.FacilityService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -15,16 +12,13 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/facility")
 @RequiredArgsConstructor
 public class FacilityController {
-    private final FacilityService facilityService;
-    private final FacilityProgramService facilityProgramService;
-    private final FacilityScheduleService facilityScheduleService;
 
     @GetMapping("/{facilityId}/detail")
     public ResponseEntity<ApiResponse<FacilityDetailResponseDto>> getFacilityDetail(
             @PathVariable Long facilityId,
             @RequestParam Long userId
     ) {
-        FacilityDetailResponseDto facility = facilityService.getFacilityDetail(facilityId, userId);
+        FacilityDetailResponseDto facility = null;
         return ResponseEntity.ok(ApiResponse.success("시설 상세 조회", facility));
     }
 
@@ -35,8 +29,7 @@ public class FacilityController {
             @RequestParam(defaultValue = "0", required = false) int page,
             @RequestParam(defaultValue = "8", required = false) int size
     ) {
-        ListFacilityProgramResponseDto facilityPrograms =
-                facilityProgramService.getFacilityPrograms(facilityId, userId, page, size);
+        ListFacilityProgramResponseDto facilityPrograms = null;
         return ResponseEntity.ok(ApiResponse.success("시설 프로그램 리스트 조회", facilityPrograms));
     }
 
@@ -47,8 +40,7 @@ public class FacilityController {
             @RequestParam(defaultValue = "0", required = false) int page,
             @RequestParam(defaultValue = "8", required = false) int size
     ) {
-        ListFacilityScheduleResponseDto schedules =
-                facilityScheduleService.getFacilitySchedules(facilityId, userId, page, size);
+        ListFacilityScheduleResponseDto schedules = null;
         return ResponseEntity.ok(ApiResponse.success("시설 스케줄 리스트 조회", schedules));
     }
 }

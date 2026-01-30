@@ -1,11 +1,10 @@
 package com.modufit.users.entity;
 
 import com.modufit.common.BaseTimeEntity;
-import com.modufit.users.entity.enums.UserType;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 @Entity
 @Builder
@@ -15,10 +14,10 @@ import java.time.LocalDateTime;
 @Table(
         name = "users",
         uniqueConstraints = {
-                @UniqueConstraint(columnNames = "email")
+                @UniqueConstraint(columnNames = "user_email")
         },
         indexes = {
-                @Index(name = "idx_email", columnList = "email")
+                @Index(name = "idx_user_email", columnList = "user_email")
         }
 )
 public class User extends BaseTimeEntity {
@@ -28,34 +27,48 @@ public class User extends BaseTimeEntity {
     @Column(name = "user_id")
     private Long userId;
 
-    @Column(unique = true, nullable = false)
+    @Column(name = "user_email", nullable = false, unique = true, length = 100)
     private String email;
 
-    @Column(name = "password_hash", nullable = false)
+    @Column(name = "user_password_hash", nullable = false)
     private String passwordHash;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "user_type", nullable = false)
-    private UserType userType;
+    @Column(name = "user_name", nullable = false, length = 50)
+    private String userName;
 
-    @Column(name = "is_active")
-    @Builder.Default
-    private Boolean isActive = true;
+    @Column(name = "user_phone", length = 20)
+    private String userPhone;
 
-    @Column(name = "last_login_at")
-    private LocalDateTime lastLoginAt;
+    @Column(name = "user_age")
+    private Integer userAge;
 
-    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
-    private UserProfile userProfile;
+    @Column(name = "user_gender", length = 10)
+    private String userGender;
 
+    @Column(name = "user_work", length = 50)
+    private String userWork;
 
-    public static User of(
-            String email, String password, UserType userType, UserProfile userProfile) {
-        return User.builder()
-                .email(email)
-                .passwordHash(password)
-                .userType(userType)
-                .userProfile(userProfile)
-                .build();
-    }
+    @Column(name = "user_join_date", nullable = false)
+    private LocalDate userJoinDate;
+
+    @Column(name = "user_first_address", length = 20)
+    private String firstAddress;     // 시/도
+
+    @Column(name = "user_second_address", length = 20)
+    private String secondAddress;    // 시/군/구
+
+    @Column(name = "user_third_address", length = 20)
+    private String thirdAddress;     // 읍/면/동
+
+    @Column(name = "user_address_detail")
+    private String addressDetail;
+
+    @Column(name = "user_address_x")
+    private Double addressX;         // 위도
+
+    @Column(name = "user_address_y")
+    private Double addressY;         // 경도
+
+    @Column(name = "is_deleted")
+    private Boolean isDeleted;
 }

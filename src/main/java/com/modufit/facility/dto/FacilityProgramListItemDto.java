@@ -26,18 +26,4 @@ public class FacilityProgramListItemDto {
     private BigDecimal programPrice;
     private Boolean isParticipating;
 
-    public static FacilityProgramListItemDto from(FacilityProgram facilityProgram) {
-        return FacilityProgramListItemDto.builder()
-                .programId(facilityProgram.getProgramId())
-                .programType(facilityProgram.getProgramType())
-                .programName(facilityProgram.getProgramName())
-                .programTarget(facilityProgram.getProgramTarget())
-                .beginDate(facilityProgram.getBeginDate())
-                .endDate(facilityProgram.getEndDate())
-                .openWeekday(facilityProgram.getOpenWeekday())
-                .timeZoneValue(facilityProgram.getTimeZoneValue())
-                .recruitCapacity(facilityProgram.getRecruitCapacity())
-                .programPrice(facilityProgram.getProgramPrice())
-                .build();
-    }
 }

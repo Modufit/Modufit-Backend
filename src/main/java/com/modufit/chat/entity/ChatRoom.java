@@ -2,7 +2,6 @@ package com.modufit.chat.entity;
 
 import com.modufit.common.BaseTimeEntity;
 import com.modufit.facility.entity.Facility;
-import com.modufit.facility.entity.FacilitySchedule;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -32,10 +31,6 @@ public class ChatRoom extends BaseTimeEntity {
     @Column(name = "is_active")
     @Builder.Default
     private Boolean isActive = true;
-
-    @OneToMany(mappedBy = "chatRoom", cascade = CascadeType.ALL)
-    @Builder.Default
-    private List<ChatParticipant> participants = new ArrayList<>();
 
     @OneToMany(mappedBy = "chatRoom", cascade = CascadeType.ALL)
     @Builder.Default

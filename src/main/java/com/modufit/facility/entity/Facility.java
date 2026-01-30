@@ -1,26 +1,24 @@
 package com.modufit.facility.entity;
 
-import com.modufit.chat.entity.ChatRoom;
 import com.modufit.common.BaseTimeEntity;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.EqualsAndHashCode;
+import lombok.*;
 
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name = "facilities", indexes = {
-        @Index(name = "idx_sido_name", columnList = "sido_name"),
-        @Index(name = "idx_sigungu_name", columnList = "sigungu_name"),
-        @Index(name = "idx_sport_type", columnList = "sport_type"),
-        @Index(name = "idx_facility_name", columnList = "facility_name"),
-})
-@Data
-@EqualsAndHashCode(callSuper = true)
+@Table(
+        name = "facilities",
+        indexes = {
+                @Index(name = "idx_facilities_name", columnList = "facility_name"),
+                @Index(name = "idx_facilities_type", columnList = "facility_type"),
+                @Index(name = "idx_facilities_sport_type", columnList = "sport_type"),
+                @Index(name = "idx_facilities_address", columnList = "facility_first_address, facility_second_address")
+        }
+)
+@Getter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -31,6 +29,10 @@ public class Facility extends BaseTimeEntity {
     @Column(name = "facility_id")
     private Long facilityId;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "facility_admin_id", nullable = false)
+    private FacilityAdmin facilityAdmin;
+
     @Column(name = "facility_name", nullable = false, length = 200)
     private String facilityName;
 
@@ -40,28 +42,36 @@ public class Facility extends BaseTimeEntity {
     @Column(name = "sport_type", nullable = false, length = 100)
     private String sportType;
 
-    @Column(nullable = false, length = 500)
-    private String address;
+    @Column(name = "facility_image")
+    private String facilityImage;
 
-    @Column(name = "sido_name", nullable = false, length = 100)
-    private String sidoName;
+    @Column(name = "facility_url")
+    private String facilityUrl;
 
-    @Column(name = "sigungu_name", nullable = false, length = 100)
-    private String sigunguName;
 
-    @Column(name = "open_weekday", nullable = false)
-    private String openWeekday;
+    @Column(name = "facility_first_address", length = 20)
+    private String firstAddress;     // 시/도
 
-    @Column(name = "is_active")
-    @Builder.Default
-    private Boolean isActive = true;
+    @Column(name = "facility_second_address", length = 20)
+    private String secondAddress;    // 시/군/구
 
-    @OneToOne(mappedBy = "facility", cascade = CascadeType.ALL)
-    private ChatRoom chatRoom;
+    @Column(name = "facility_third_address", length = 20)
+    private String thirdAddress;     // 읍/면/동
 
-    @OneToMany(mappedBy = "facility", cascade = CascadeType.ALL)
-    @Builder.Default
-    private List<FacilitySchedule> schedules = new ArrayList<>();
+    @Column(name = "facility_address_detail")
+    private String addressDetail;
+
+    @Column(name = "facility_address_x")
+    private Double addressX;         // 위도
+
+    @Column(name = "facility_address_y")
+    private Double addressY;         // 경도
+
+    @Column(name = "facility_start_time")
+    private LocalTime startTime;
+
+    @Column(name = "facility_end_time")
+    private LocalTime endTime;
 
     @OneToMany(mappedBy = "facility", cascade = CascadeType.ALL)
     @Builder.Default

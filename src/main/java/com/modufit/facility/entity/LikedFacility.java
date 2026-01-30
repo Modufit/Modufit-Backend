@@ -22,7 +22,7 @@ import lombok.*;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Builder
-public class FavoriteFacility extends BaseTimeEntity {
+public class LikedFacility extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -37,8 +37,8 @@ public class FavoriteFacility extends BaseTimeEntity {
     @JoinColumn(name = "facility_id", nullable = false)
     private Facility facility;
 
-    public static FavoriteFacility of(User user, Facility facility) {
-        return FavoriteFacility.builder()
+    public static LikedFacility of(User user, Facility facility) {
+        return LikedFacility.builder()
                 .user(user)
                 .facility(facility)
                 .build();

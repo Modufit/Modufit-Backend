@@ -38,7 +38,7 @@ public class ChatMessageServiceImpl implements ChatMessageService {
     @Transactional
     public ChatResponseDto saveMessage(ChatRequestDto messageDto) {
         ChatRoom room = chatRoomService.getChatRoomById(messageDto.getChatRoomId());
-        User sender = userService.getUserWithProfile(messageDto.getSenderId());
+        User sender = userService.getUserById(messageDto.getSenderId());
 
         ChatMessage chat = ChatMessage.of(messageDto.getMessage(), sender, room);
         ChatMessage saved = chatMessageRepository.save(chat);
@@ -73,7 +73,6 @@ public class ChatMessageServiceImpl implements ChatMessageService {
                 .messageType(MessageType.TALK)
                 .chatRoomId(message.getChatRoom().getRoomId())
                 .senderId(message.getSender().getUserId())
-                .senderName(message.getSender().getUserProfile().getUserName())
                 .message(message.getMessage())
                 .sendTime(message.getSentAt())
                 .build();

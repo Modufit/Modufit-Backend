@@ -7,9 +7,14 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 
 @Entity
-@Table(name = "faility_programs")
+@Table(
+        name = "facility_programs",
+        indexes = {
+                @Index(name = "idx_program_work", columnList = "program_work"),
+                @Index(name = "idx_program_price", columnList = "program_price")
+        }
+)
 @Getter
-@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -24,30 +29,34 @@ public class FacilityProgram extends BaseTimeEntity {
     @JoinColumn(name = "facility_id", nullable = false)
     private Facility facility;
 
-    @Column(name = "program_type", length = 200)
-    private String programType;
+    @Column(name = "program_operating_day", length = 100)
+    private String programOperatingDay;
 
-    @Column(name = "program_name", length = 200, nullable = false)
-    private String programName;
+    @Column(name = "program_operating_time", length = 100)
+    private String programOperatingTime;
+
+    @Column(name = "program_work", length = 100)
+    private String programWork;
 
     @Column(name = "program_target", length = 200)
     private String programTarget;
 
-    @Column(name = "begin_date")
-    private LocalDate beginDate;
+    @Column(name = "program_max_participants")
+    private Integer programMaxParticipants;
 
-    @Column(name = "end_date")
-    private LocalDate endDate;
+    @Column(name = "program_min_participants")
+    private Integer programMinParticipants;
 
-    @Column(name = "open_weekday", length = 200)
-    private String openWeekday;
+    @Column(name = "program_current_participants")
+    private Integer programCurrentParticipants;
 
-    @Column(name = "time_zone_value", length = 200)
-    private String timeZoneValue;
-
-    @Column(name = "recruit_capacity", precision = 38)
-    private BigDecimal recruitCapacity;
-
-    @Column(name = "program_price", precision = 28, scale = 5)
+    @Column(name = "program_price")
     private BigDecimal programPrice;
+
+    @Column(name = "program_reservation")
+    private Boolean programReservation;
+
+    @Column(name = "program_image")
+    private String programImage;
 }
+

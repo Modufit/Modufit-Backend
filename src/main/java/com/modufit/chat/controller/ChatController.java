@@ -3,7 +3,6 @@ package com.modufit.chat.controller;
 import com.modufit.chat.dto.ChatRequestDto;
 import com.modufit.chat.dto.ChatResponseDto;
 import com.modufit.chat.service.ChatMessageService;
-import com.modufit.chat.service.ChatParticipantService;
 import com.modufit.common.ApiResponse;
 import com.modufit.common.exception.BusinessException;
 import lombok.RequiredArgsConstructor;
@@ -21,7 +20,6 @@ import org.springframework.stereotype.Controller;
 public class ChatController {
 
     private final ChatMessageService chatMessageService;
-    private final ChatParticipantService chatParticipantService;
     private final SimpMessagingTemplate messagingTemplate;
 
     @MessageMapping("/chat/message")
@@ -40,7 +38,7 @@ public class ChatController {
             headerAccessor.getSessionAttributes().put("userId", messageDto.getSenderId());
             headerAccessor.getSessionAttributes().put("chatRoomId", messageDto.getChatRoomId());
 
-            ChatResponseDto enter = chatParticipantService.enterChatRoom(messageDto.getChatRoomId(), messageDto.getSenderId());
+            ChatResponseDto enter = null;
             sendMessage(enter);
         } catch (BusinessException e) {
             sendErrorMessage(e, headerAccessor);
@@ -51,7 +49,7 @@ public class ChatController {
     public void leaveChatRoom(@Payload ChatRequestDto messageDto) {
         log.info("채팅방 퇴장: {}", messageDto);
 
-        ChatResponseDto leave = chatParticipantService.leaveChatRoom(messageDto.getChatRoomId(), messageDto.getSenderId());
+        ChatResponseDto leave = null;
         sendMessage(leave);
     }
 

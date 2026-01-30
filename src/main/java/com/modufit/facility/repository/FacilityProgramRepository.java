@@ -11,7 +11,4 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface FacilityProgramRepository extends JpaRepository<FacilityProgram, Long> {
 
-    @EntityGraph(attributePaths = {"facility"})
-    Page<FacilityProgram> getFacilityPrograms(@Param("facilityId") Long facilityId, Pageable pageable);
-
 }

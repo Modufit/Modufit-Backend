@@ -4,7 +4,6 @@ import com.modufit.chat.dto.ChatResponseDto;
 import com.modufit.chat.dto.ChatRoomDetailResponseDto;
 import com.modufit.chat.dto.PageChatRoomResponseDto;
 import com.modufit.chat.service.ChatMessageService;
-import com.modufit.chat.service.ChatParticipantService;
 import com.modufit.chat.service.ChatRoomService;
 import com.modufit.common.ApiResponse;
 import lombok.RequiredArgsConstructor;
@@ -20,7 +19,6 @@ public class ChatRoomController {
 
     private final ChatMessageService chatMessageService;
     private final ChatRoomService chatRoomService;
-    private final ChatParticipantService participantService;
 
     @GetMapping("/{chatRoomId}/messages/recent")
     public ResponseEntity<ApiResponse<List<ChatResponseDto>>> getRecentMessages(
@@ -60,7 +58,6 @@ public class ChatRoomController {
     @PutMapping("/{chatRoomId}/participants/{participantId}")
     public ResponseEntity<ApiResponse<Void>> leftAtParticipant(
             @PathVariable Long chatRoomId, @PathVariable Long participantId) {
-        participantService.leftAtParticipant(chatRoomId, participantId);
 
         return ResponseEntity.ok().build();
     }
